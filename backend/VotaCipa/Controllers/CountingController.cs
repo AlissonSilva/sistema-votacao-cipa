@@ -55,18 +55,20 @@ public class CountingController : ControllerBase
     {
         var totalVotes = await _context.Votes.CountAsync(v => v.ElectoralPeriodId == period.Id);
 
-        var results = await _context.Candidates
+        var candidatesWithVotes = await _context.Candidates
             .Where(c => c.ElectoralPeriodId == period.Id)
-            .Select(c => new CandidateVoteCount(
-                c.Id,
-                c.Name,
-                c.Registration,
-                c.Department,
-                c.Votes.Count,
-                totalVotes > 0 ? Math.Round((double)c.Votes.Count / totalVotes * 100, 2) : 0
-            ))
+            .Select(c => new { c.Id, c.Name, c.Registration, c.Department, VoteCount = c.Votes.Count })
             .OrderByDescending(c => c.VoteCount)
             .ToListAsync();
+
+        var results = candidatesWithVotes.Select(c => new CandidateVoteCount(
+            c.Id,
+            c.Name,
+            c.Registration,
+            c.Department,
+            c.VoteCount,
+            totalVotes > 0 ? Math.Round((double)c.VoteCount / totalVotes * 100, 2) : 0
+        )).ToList();
 
         return new CountingResponse(
             period.Id,
