@@ -1,0 +1,6 @@
+@VotaCipa_HostAddress = http://localhost:5083
+
+GET {{VotaCipa_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
